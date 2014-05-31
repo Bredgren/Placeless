@@ -40,7 +40,7 @@ class PlayState extends FlxState  {
 
   private var _aim_vector:Ray;
   private var _aim_vector_length = 75;
-  private var _aim_vector_color = 0x77808080;
+  private var _aim_vector_color = 0x00808080;
 
   private var _game_save:FlxSave;
   private var _score_text:FlxText;
@@ -288,13 +288,13 @@ class PlayState extends FlxState  {
       dir.y = dir.y / length * _aim_vector_length;
       var start = new FlxPoint(_player.x + PLAYER_SIZE / 2, _player.y + PLAYER_SIZE / 2);
       var end = new FlxPoint(start.x + dir.x, start.y + dir.y);
-      _aim_vector.update2(start, end);
+      _aim_vector.update2(start, end, length / 700);
       //this.add(_aim_vector);
     } else {
       //this.remove(_aim_vector);
       var start = new FlxPoint(-100, -100);
       var end = new FlxPoint(-200, -200);
-      _aim_vector.update2(start, end);
+      _aim_vector.update2(start, end, 0);
     }
 
     _on_platform_last = on_platform;

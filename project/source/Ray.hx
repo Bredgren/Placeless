@@ -33,10 +33,14 @@ class Ray extends FlxSprite {
     _thickness = thickness;
   }
 
-  public function update2(start:FlxPoint, end:FlxPoint):Void {
+  public function update2(start:FlxPoint, end:FlxPoint, strength:Float):Void {
+    FlxG.log.add(strength);
     super.reset(0, 0);
     FlxSpriteUtil.fill(this, 0x00000000);
-    var s:LineStyle = { color: _color, thickness: _thickness };
+    //var a = Std.int(strength * 255);
+    var color = (Math.round(strength * 255) << 24) | _color;
+    FlxG.log.add(color);
+    var s:LineStyle = { color: color, thickness: _thickness };
     FlxSpriteUtil.drawLine(this, start.x, start.y, end.x, end.y, s);
   }
 }
