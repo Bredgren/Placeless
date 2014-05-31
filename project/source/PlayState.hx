@@ -10,8 +10,6 @@ import flixel.text.FlxText;
 import flixel.util.FlxPoint;
 import flixel.util.FlxSave;
 import Platform;
-import googleAnalytics.Stats;
-import googleAnalytics.DateTime;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -61,8 +59,6 @@ class PlayState extends FlxState  {
   private var _switching_music = false;
   private var _music_cutoff = 700;
 
-  private var _start_time:DateTime;
-
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
@@ -111,10 +107,6 @@ class PlayState extends FlxState  {
     }
 
     reset();
-
-    Stats.init('UA-32180872-4', 'bredgren.github.io');
-    Stats.trackPageview('/Placeless');
-    Stats.trackEvent("play", "game", "begin");
 
 		super.create();
 	}
@@ -204,7 +196,6 @@ class PlayState extends FlxState  {
 	override public function destroy():Void {
     destroyThings();
 		super.destroy();
-    Stats.trackEvent("play", "game", "end", Reg.best_score);
 	}
 
 	/**
