@@ -492,7 +492,7 @@ class PlayState extends FlxState  {
         setStory("Bye...", y);
       case 710:
         setStory("A game by Brandon Edgren\n\n\nMusic by Kevin MacLeod\n(incompetech.com):\n\nPerspectives\nInner Light", -200);
-      case 730:
+      case 720:
         setStory("Thanks for playing!", y);
     }
   }
