@@ -2,6 +2,7 @@
 -lib flixel
 -lib openfl
 -lib flixel-addons
+-lib haxe-ga
 -cp source
 -D tools=1.4.0
 -D FLX_NO_DEBUG
