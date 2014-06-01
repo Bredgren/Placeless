@@ -37,6 +37,13 @@ class Player extends FlxSprite {
     } else {
       this.set_angle(0);
     }
+
     super.update();
+
+    if (this.x < -this.width / 2) {
+      this.x = FlxG.width - this.width / 2;
+    } else if (this.x > FlxG.width - this.width / 2) {
+      this.x = -this.width / 2;
+    }
   }
 }
