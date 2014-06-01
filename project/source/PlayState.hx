@@ -311,7 +311,7 @@ class PlayState extends FlxState  {
       var start = new FlxPoint(player_pos.x, player_pos.y);
       var end = new FlxPoint(start.x + dir.x, start.y + dir.y);
       var percent = Math.min(Reg.score, _max_difficulty_height) / _max_difficulty_height;
-      _aim_vector.update2(start, end, (length / 500) * (1 - percent));
+      _aim_vector.update2(start, end, (Math.min(length, 500) / 500) * (1 - percent));
       //this.add(_aim_vector);
     } else {
       //this.remove(_aim_vector);
