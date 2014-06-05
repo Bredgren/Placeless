@@ -139,8 +139,6 @@ class PlayState extends FlxState  {
     _camera_target.makeGraphic(1, 1, 0x00000000);
     this.add(_camera_target);
 
-    //FlxG.camera.follow(_camera_target);
-
     _spawn_counter = FlxG.height / ROWS;
     _last_pos = _camera_target.y;
 
@@ -167,7 +165,6 @@ class PlayState extends FlxState  {
   }
 
   private function killPlayer():Void {
-    //FlxG.log.add("kill player");
     FlxG.sound.play("assets/sounds/Explosion1.wav");
     explode(_player.x, _player.y);
     _dead = true;
@@ -238,6 +235,8 @@ class PlayState extends FlxState  {
 
     if (_dead) return;
 
+    var flush = false;
+
     if (!_moving && FlxG.keys.justPressed.R) {
       Reg.score = 0;
       Reg.checkpoint = 0;
@@ -252,8 +251,22 @@ class PlayState extends FlxState  {
       killPlayer();
       return;
     }
+    //if (!_moving && FlxG.keys.justPressed.Q) {
+      //_game_save.erase();
+      //Reg.score = 0;
+      //Reg.checkpoint = 0;
+      //Reg.consecutive = 0;
+      //Reg.best_consecutive = 0;
+      //_score_text.text = "Height: " + Reg.score +
+                         //"\nBest Height: " + Reg.best_score +
+                         //"\nConsecutive: " + Reg.consecutive +
+                         //"\nBest Consecutive: " + Reg.best_consecutive;
+      //setStory("", FlxG.height);
+      //killPlayer();
+      //return;
+    //}
 
-    updateProgress();
+    flush = flush || updateProgress();
 
     var on_platform = false;
 
@@ -291,15 +304,11 @@ class PlayState extends FlxState  {
         _player.jump(dir);
         FlxG.sound.play("assets/sounds/Jump1.wav");
       }
-      //dir.x = dir.x / length * _aim_vector_length;
-      //dir.y = dir.y / length * _aim_vector_length;
+
       var start = new FlxPoint(player_pos.x, player_pos.y);
-      //var end = new FlxPoint(start.x + dir.x, start.y + dir.y);
       var percent = Math.min(Reg.score, _max_difficulty_height) / _max_difficulty_height;
-      _aim_vector.update2(start, dir/*end*/, (Math.min(length, 500) / 500) * (1 - percent), percent);
-      //this.add(_aim_vector);
+      _aim_vector.update2(start, dir, (Math.min(length, 500) / 500) * (1 - percent), percent);
     } else {
-      //this.remove(_aim_vector);
       var start = new FlxPoint(-100, -100);
       var end = new FlxPoint(-200, -200);
       _aim_vector.update2(start, end, 0, 0);
@@ -318,13 +327,14 @@ class PlayState extends FlxState  {
       if (Reg.score > Reg.best_score) {
         Reg.best_score = Reg.score;
         _game_save.data.best_score = Reg.best_score;
-        _game_save.flush();
+        flush = flush || true;
       }
       if (Reg.consecutive > Reg.best_consecutive) {
         Reg.best_consecutive = Reg.consecutive;
         _game_save.data.best_consecutive = Reg.best_consecutive;
-        _game_save.flush();
+        flush = flush || true;
       }
+      if (flush) _game_save.flush();
       _score_text.text = "Height: " + Reg.score +
                          "\nBest Height: " + Reg.best_score +
                          "\nConsecutive: " + Reg.consecutive +
@@ -336,7 +346,6 @@ class PlayState extends FlxState  {
     _platforms.forEachAlive(function(platform) {
       if (platform.getScreenXY().y > FlxG.height + 100) {
         platform.kill();
-        //FlxG.log.notice("killed");
       }
     });
 
@@ -344,16 +353,9 @@ class PlayState extends FlxState  {
       killPlayer();
       return;
     }
-
-    //if (player_pos.x < -_player.width) {
-      //player_pos.x = FlxG.width + _player.width;
-    //} else if (player_pos.x > FlxG.width + _player.width) {
-      //player_pos.x = -_player.width;
-    //}
   }
 
   private function _newRow():Void {
-    //FlxG.log.add("new row " + _row_pos);
     var width = FlxG.width / COLUMNS;
     var height = FlxG.height / ROWS;
     if (!_moving)
@@ -363,52 +365,36 @@ class PlayState extends FlxState  {
     var min_y = _row_pos + padding;
     var max_y = _row_pos + height - padding;
 
-    var choices = [];
-    for (i in 0...COLUMNS) {
-      choices.push(i);
+    var bucket = Math.floor(Math.random() *  COLUMNS);
+    var min_x = bucket * width + padding;
+    var max_x = min_x + width - padding;
+    var x = Math.random() * (max_x - min_x) + min_x;
+    var y = Math.random() * (max_y - min_y) + min_y;
+    var type = PlatformType.NORMAL;
+    if (Math.random() < currentSpikeChance() && _consecutive_spike_counter < 2) {
+      type = PlatformType.SPIKE;
+      _consecutive_spike_counter++;
+    } else {
+      _consecutive_spike_counter = 0;
     }
-    //FlxG.log.add("choices: " + choices);
-    var buckets = [];
-    for (i in 0...1) {
-      var index = Math.floor(Math.random() * choices.length);
-      //FlxG.log.add(index);
-      buckets.push(choices[index]);
-      choices.remove(index);
+    x -= currentPlatformWidth() / 2;
+    y -= currentPlatformWidth() / 2;
+    var p = _platforms.recycle(Platform, [x, y, currentPlatformWidth(), _platform_height, type]);
+    p.setup(x, y, currentPlatformWidth(), _platform_height, type);
+    if (_moving) {
+      p.velocity.y = _speed;
     }
 
-    //FlxG.log.add("buckets: " + buckets);
-    for (bucket in buckets) {
-      var min_x = bucket * width + padding;
-      var max_x = min_x + width - padding;
-      var x = Math.random() * (max_x - min_x) + min_x;
-      var y = Math.random() * (max_y - min_y) + min_y;
-      var type = PlatformType.NORMAL;
-      if (Math.random() < currentSpikeChance() && _consecutive_spike_counter < 2) {
-        type = PlatformType.SPIKE;
-        _consecutive_spike_counter++;
-      } else {
-        _consecutive_spike_counter = 0;
-      }
-      x -= currentPlatformWidth() / 2;
-      y -= currentPlatformWidth() / 2;
-      //FlxG.log.add(type + " | " + bucket + " | " + Std.int(x) + ", " + Std.int(y));
-      var p = _platforms.recycle(Platform, [x, y, currentPlatformWidth(), _platform_height, type]);
-      p.setup(x, y, currentPlatformWidth(), _platform_height, type);
-      if (_moving) {
-        p.velocity.y = _speed;
-      }
+    p = _platforms.recycle(Platform, [x + FlxG.width, y, currentPlatformWidth(), _platform_height, type]);
+    p.setup(x + FlxG.width, y, currentPlatformWidth(), _platform_height, type);
+    if (_moving) {
+      p.velocity.y = _speed;
+    }
 
-      p = _platforms.recycle(Platform, [x + FlxG.width, y, currentPlatformWidth(), _platform_height, type]);
-      p.setup(x + FlxG.width, y, currentPlatformWidth(), _platform_height, type);
-      if (_moving) {
-        p.velocity.y = _speed;
-      }
-
-      p = _platforms.recycle(Platform, [x - FlxG.width, y, currentPlatformWidth(), _platform_height, type]);
-      p.setup(x - FlxG.width, y, currentPlatformWidth(), _platform_height, type);
-      if (_moving) {
-        p.velocity.y = _speed;
-      }
+    p = _platforms.recycle(Platform, [x - FlxG.width, y, currentPlatformWidth(), _platform_height, type]);
+    p.setup(x - FlxG.width, y, currentPlatformWidth(), _platform_height, type);
+    if (_moving) {
+      p.velocity.y = _speed;
     }
   }
 
@@ -445,11 +431,12 @@ class PlayState extends FlxState  {
     _story.y = y;
   }
 
-  private function updateProgress() {
+  private function updateProgress():Bool {
+    var ret = false;
     if (Reg.score <= 700 && Reg.score >= Reg.checkpoint + _checkpoint_rate) {
         Reg.checkpoint += _checkpoint_rate;
         _game_save.data.checkpoint = Reg.checkpoint;
-        _game_save.flush();
+        ret = true;
     }
 
     var y = -50;
@@ -535,5 +522,7 @@ class PlayState extends FlxState  {
       case 720:
         setStory("Thanks for playing!", y);
     }
+
+    return ret;
   }
 }

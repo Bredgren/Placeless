@@ -22,10 +22,8 @@ class Player extends FlxSprite {
   }
 
   public function jump(dir:FlxPoint):Void {
-    //FlxG.log.add("jump: " + dir);
     this.velocity.x = dir.x * JUMP_MULTIPLIER;
     this.velocity.y = dir.y * JUMP_MULTIPLIER;
-    //FlxG.log.add("vel: " + this.velocity);
   }
 
   override public function update():Void {
