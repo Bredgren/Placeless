@@ -21,7 +21,7 @@ class PlayState extends FlxState  {
   private var PLAYER_SIZE = 40;
   private var PLAYER_GRAVITY = 800;
 
-  private var _speed = 80;
+  private var _speed = 100;
   private var _platform_width_min = 125;
   private var _platform_width_max = 200;
   private var _platform_height = 10;
@@ -277,22 +277,7 @@ class PlayState extends FlxState  {
     player_pos.x += _player.width / 2;
     player_pos.y += _player.height / 2;
     var dir = new FlxPoint(mouse_pos.x - player_pos.x, mouse_pos.y - player_pos.y);
-    //var player_pos2 = new FlxPoint(player_pos.x + FlxG.width, player_pos.y);
-    //var player_pos3 = new FlxPoint(player_pos.x - FlxG.width, player_pos.y);
-    //var dir2 = new FlxPoint(mouse_pos.x - player_pos2.x, mouse_pos.y - player_pos2.y);
-    //var dir3 = new FlxPoint(mouse_pos.x - player_pos3.x, mouse_pos.y - player_pos3.y);
     var length = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
-    //var length2 = Math.sqrt(dir2.x * dir2.x + dir2.y * dir2.y);
-    //var length3 = Math.sqrt(dir3.x * dir3.x + dir3.y * dir3.y);
-    //if (length2 < length || length3 < length) {
-      //if (length2 < length3) {
-        //dir = dir2;
-        //length = length2;
-      //} else {
-        //dir = dir3;
-        //length = length3;
-      //}
-    //}
     if (on_platform) {
       if (!_on_platform_last)
         FlxG.sound.play("assets/sounds/land1.wav");
@@ -306,18 +291,18 @@ class PlayState extends FlxState  {
         _player.jump(dir);
         FlxG.sound.play("assets/sounds/Jump1.wav");
       }
-      dir.x = dir.x / length * _aim_vector_length;
-      dir.y = dir.y / length * _aim_vector_length;
+      //dir.x = dir.x / length * _aim_vector_length;
+      //dir.y = dir.y / length * _aim_vector_length;
       var start = new FlxPoint(player_pos.x, player_pos.y);
-      var end = new FlxPoint(start.x + dir.x, start.y + dir.y);
+      //var end = new FlxPoint(start.x + dir.x, start.y + dir.y);
       var percent = Math.min(Reg.score, _max_difficulty_height) / _max_difficulty_height;
-      _aim_vector.update2(start, end, (Math.min(length, 500) / 500) * (1 - percent));
+      _aim_vector.update2(start, dir/*end*/, (Math.min(length, 500) / 500) * (1 - percent), percent);
       //this.add(_aim_vector);
     } else {
       //this.remove(_aim_vector);
       var start = new FlxPoint(-100, -100);
       var end = new FlxPoint(-200, -200);
-      _aim_vector.update2(start, end, 0);
+      _aim_vector.update2(start, end, 0, 0);
     }
 
     _on_platform_last = on_platform;
